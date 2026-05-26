@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concert Workflow 完整指南</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow-x: hidden;
+            background: #0f0f0f;
+            font-family: 'Inter', sans-serif;
+            color: #e8e4df;
+        }
+
+        /* Abstract gradient circles */
+        .shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape-1 {
+            width: clamp(200px, 30vw, 400px);
+            height: clamp(200px, 30vw, 400px);
+            background: radial-gradient(circle, #d4a574 0%, transparent 70%);
+            top: 10%;
+            right: 15%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: clamp(250px, 35vw, 500px);
+            height: clamp(250px, 35vw, 500px);
+            background: radial-gradient(circle, #e8b4b8 0%, transparent 70%);
+            bottom: 15%;
+            left: 10%;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        .shape-3 {
+            width: clamp(180px, 25vw, 350px);
+            height: clamp(180px, 25vw, 350px);
+            background: radial-gradient(circle, #c9b896 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: float 30s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -30px); }
+            66% { transform: translate(-20px, 20px); }
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: clamp(1.5rem, 3vw, 3rem);
+        }
+
+        .slide-content {
+            width: min(95vw, 1200px);
+            max-height: 90vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Navigation dots */
+        .nav-dots {
+            position: fixed;
+            right: clamp(1rem, 3vw, 2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(212, 165, 116, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: #d4a574;
+            transform: scale(1.5);
+        }
+
+        /* Common elements */
+        .rule {
+            width: clamp(60px, 10vw, 100px);
+            height: 2px;
+            background: #d4a574;
+            margin: 0 auto clamp(1.5rem, 3vh, 2.5rem);
+        }
+
+        .chapter-number {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 600;
+            color: #d4a574;
+            opacity: 0.4;
+            line-height: 1;
+        }
+
+        .accent-line {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: clamp(100px, 20vh, 150px);
+            background: linear-gradient(to bottom, transparent, #d4a574, transparent);
+        }
+
+        .eyebrow {
+            font-size: clamp(0.7rem, 1vw, 0.85rem);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #9a9590;
+            margin-bottom: clamp(1rem, 2vh, 1.5rem);
+            font-weight: 300;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 7vw, 6.5rem);
+            font-weight: 600;
+            color: #e8e4df;
+            line-height: 1.15;
+            margin-bottom: clamp(1rem, 3vh, 2rem);
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 600;
+            color: #e8e4df;
+            line-height: 1.2;
+            margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+        }
+
+        .ornament {
+            width: clamp(40px, 6vw, 60px);
+            height: 1px;
+            background: #d4a574;
+            margin: clamp(1.5rem, 3vh, 2.5rem) auto;
+            position: relative;
+        }
+
+        .ornament::before,
+        .ornament::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #d4a574;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .ornament::before { left: -8px; }
+        .ornament::after { right: -8px; }
+
+        .subtitle {
+            font-size: clamp(1.2rem, 2vw, 1.6rem);
+            color: #9a9590;
+            line-height: 1.7;
+            font-weight: 300;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Content slide styles */
+        .content-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1rem, 2.5vh, 2rem);
+            margin-top: clamp(1.5rem, 3vh, 2.5rem);
+        }
+
+        .content-list li {
+            font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+            color: #c9d1d9;
+            line-height: 1.6;
+            padding-left: clamp(1.5rem, 3vw, 2rem);
+            position: relative;
+        }
+
+        .content-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #d4a574;
+            font-weight: 500;
+        }
+
+        /* Code block */
+        .code-block {
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            border-radius: 8px;
+            padding: clamp(1.5rem, 2.5vw, 2rem);
+            margin-top: clamp(1.5rem, 3vh, 2rem);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+            color: #c9d1d9;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; font-style: italic; }
+
+        /* Grid layout for features */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: clamp(1rem, 2vw, 1.5rem);
+            margin-top: clamp(1.5rem, 3vh, 2rem);
+        }
+
+        .feature-card {
+            background: rgba(212, 165, 116, 0.05);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .feature-card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+            color: #d4a574;
+            margin-bottom: clamp(0.5rem, 1vh, 0.8rem);
+        }
+
+        .feature-card p {
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            color: #9a9590;
+            line-height: 1.6;
+        }
+
+        /* Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal:nth-child(1) { transition-delay: 0.1s; }
+        .reveal:nth-child(2) { transition-delay: 0.2s; }
+        .reveal:nth-child(3) { transition-delay: 0.3s; }
+        .reveal:nth-child(4) { transition-delay: 0.4s; }
+        .reveal:nth-child(5) { transition-delay: 0.5s; }
+        .reveal:nth-child(6) { transition-delay: 0.6s; }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: clamp(1rem, 3vh, 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.7rem, 1vw, 0.85rem);
+            color: rgba(154, 149, 144, 0.5);
+            z-index: 100;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+
+    <nav class="nav-dots">
+        <!-- Navigation dots will be generated dynamically by JavaScript -->
+    </nav>
+
+    <!-- Slide 1: Title -->
+    <section class="slide visible">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">01</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">技術教學系列</div>
+                <h1 class="reveal">Concert Enablement</h1>
+                <div class="ornament reveal"></div>
+                <p class="subtitle reveal">從部署方法到 Vault 整合<br>掌握關鍵技術的深入探討</p>
+                
+                <!-- Author info in bottom left -->
+                <div class="reveal" style="position: absolute; bottom: calc(-1 * clamp(15rem, 25vh, 20rem)); left: 0; text-align: left;">
+                    <p style="font-size: clamp(1rem, 1.6vw, 1.2rem); font-weight: 500; color: #e8e4df; margin-bottom: 0.4rem;">Platform Engineer</p>
+                    <p style="font-size: clamp(0.95rem, 1.5vw, 1.1rem); color: #9a9590; margin-bottom: 0.3rem;">Raphael Li</p>
+                    <p style="font-size: clamp(0.9rem, 1.4vw, 1.05rem); color: #9a9590;">Raphael.Li@ibm.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 2: Outline -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574;">Outline</h2>
+                <ul class="content-list">
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Concert Breifing</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Deployment Methods & System Requirement</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Prerequisites</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Concert & Concert Workflow Air-gapped Installation</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Use Case 1: Get Certificate List from Vault via Concert workflow</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Use Case 2: External Certificate Renewal via Concert workflow & Vault</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <!-- Slide 3: Concert Briefing - 什麼是 Concert? -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">03</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574;">什麼是 IBM Concert?</h2>
+                
+                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
+                    <p class="reveal" style="font-size: clamp(1.2rem, 2vw, 1.6rem); color: #e8e4df; line-height: 1.7; margin-bottom: clamp(2rem, 4vh, 3rem); text-align: center; font-style: italic;">
+                        統一的 AI 驅動平台,用於應用程式資源管理與自動化
+                    </p>
+                    
+                    <ul class="content-list">
+                        <li class="reveal">整合多雲環境中的應用程式資源管理</li>
+                        <li class="reveal">提供統一的可觀測性和控制平面</li>
+                        <li class="reveal">透過 AI 驅動的洞察優化資源配置</li>
+                        <li class="reveal">支援自動化工作流程和策略執行</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Concert Briefing - 核心功能 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">04</div>
+                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">Concert 核心功能</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card reveal">
+                        <h3>🎯 資源管理</h3>
+                        <p>統一管理跨多雲環境的應用程式資源,提供完整的資源清單和狀態追蹤</p>
+                    </div>
+                    
+                    <div class="feature-card reveal">
+                        <h3>🔄 工作流程自動化</h3>
+                        <p>透過 Concert Workflows 建立和執行自動化任務,簡化日常運維操作</p>
+                    </div>
+                    
+                    <div class="feature-card reveal">
+                        <h3>📊 可觀測性</h3>
+                        <p>整合監控、日誌和追蹤數據,提供全面的應用程式健康狀態視圖</p>
+                    </div>
+                    
+                    <div class="feature-card reveal">
+                        <h3>🤖 AI 洞察</h3>
+                        <p>利用 AI 分析資源使用模式,提供優化建議和異常檢測</p>
+                    </div>
+                    
+                    <div class="feature-card reveal">
+                        <h3>🔐 安全整合</h3>
+                        <p>與 Vault 等安全工具整合,實現憑證和密鑰的集中管理</p>
+                    </div>
+                    
+                    <div class="feature-card reveal">
+                        <h3>📈 擴展性</h3>
+                        <p>支援自定義連接器和工作流程,適應不同的企業需求</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Concert Workflows 簡介 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">05</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574;">Concert Workflows</h2>
+                
+                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
+                    <p class="reveal" style="font-size: clamp(1.15rem, 1.9vw, 1.5rem); color: #e8e4df; line-height: 1.7; margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        Concert Workflows 是基於 <strong style="color: #d4a574;">Apache Airflow</strong> 的工作流程自動化引擎
+                    </p>
+                    
+                    <ul class="content-list">
+                        <li class="reveal">使用 Python 定義工作流程 (DAGs)</li>
+                        <li class="reveal">支援複雜的任務依賴和排程</li>
+                        <li class="reveal">提供豐富的內建 Operators 和 Hooks</li>
+                        <li class="reveal">可視化工作流程執行狀態和歷史記錄</li>
+                        <li class="reveal">與 Concert 平台深度整合</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Concert 架構概覽 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">06</div>
+                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(1.5rem, 3vh, 2rem);">Concert 架構概覽</h2>
+                
+                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
+                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem);">
+                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">三層架構</h3>
+                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;"><strong>控制平面</strong> — Concert 核心服務、API 和 UI</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;"><strong>工作流程層</strong> — Concert Workflows (Airflow)</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;"><strong>數據層</strong> — Concert Data Apps (分析和報表)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Deployment Methods & System Requirement 標題頁 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">07</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">部署與系統需求</div>
+                <h1 class="reveal">Deployment Methods<br>& System Requirement</h1>
+                <div class="ornament reveal"></div>
+                <p class="subtitle reveal">了解不同的部署選項與環境準備</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Concert Deployment Methods -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">08</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">
+                    Concert Deployment Methods
+                </h2>
+                
+                <ul class="content-list">
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Method 1 : SaaS Deployment</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Method 2 : On-premises deployment to OpenShift Container Platform</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Method 3 : On-premises deployment to Amazon Elastic Kubernetes Service (EKS)</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Method 4 : On-premises deployment to a virtual machine (VM)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 9: System Requirement - VM 硬體規格 (1/5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">09</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – VM 硬體規格 (1/5)</h2>
+                <p class="reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Table 1. Sizing specifications</p>
+                
+                <div class="table-container reveal">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">
+                        <thead>
+                            <tr style="background: rgba(212, 165, 116, 0.15);">
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Component</th>
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Testing environment</th>
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Production environment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">CPU Cores</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">16 cores</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">32 cores</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">RAM</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">32 GB</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">64 GB</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem);">Disk space</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem);">512 GB (minimum)</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem);">1 TB (minimum)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 10: System Requirement - VM 作業系統 (2/5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">10</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – VM 作業系統 (2/5)</h2>
+                <p class="reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Table 2. Supported operating systems</p>
+                
+                <div class="table-container reveal">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">
+                        <thead>
+                            <tr style="background: rgba(212, 165, 116, 0.15);">
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Operating System (OS)</th>
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Recommended Container Runtime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Red Hat® Enterprise Linux (RHEL) (version 9 or later)</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Podman (rootless)</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Ubuntu</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Docker</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem);">SUSE</td>
+                                <td style="padding: clamp(0.9rem, 1.7vh, 1.2rem);">Docker</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="reveal" style="margin-top: clamp(1.5rem, 3vh, 2rem); padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574; font-size: var(--small-size);">
+                    <p style="margin-bottom: 0.5rem;"><strong>Important:</strong></p>
+                    <p style="margin-bottom: 0.5rem;">• <strong>SELinux:</strong> SELinux is not officially supported. However, setting SELINUXTYPE=targeted and using an unconfined user typically allows successful installation.</p>
+                    <p style="margin-bottom: 0.5rem;">• <strong>RHEL 8 compatibility:</strong> Contact IBM Support for more information.</p>
+                    <p style="margin: 0;">• <strong>RHEL 10 support:</strong> You can install Concert and Concert Workflows using a RHEL version 10 VM.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 11: System Requirement - VM 網路相關設定 (3/5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">11</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – VM 網路相關設定 (3/5)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.2rem, 2.5vh, 1.8rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">Verify IPv6 is enabled on you Concert Workflows if it is disabled</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">ip</span> -6 <span class="keyword">addr</span> show
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">(Optional) Run the following command to enable IPv6 on RHEL if it is disabled.</h3>
+                
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>a) Edit sysctl configuration</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">ip</span> -6 <span class="keyword">addr</span> show
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>b) Add or uncomment these lines.</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+net.ipv6.conf.all.disable_ipv6 = 0
+net.ipv6.conf.default.disable_ipv6 = 0
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>c) Apply Changes.</strong></p>
+                <div class="code-block reveal" style="font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">sudo</span> <span class="keyword">sysctl</span> -p
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 12: System Requirement - VM 網路相關設定 (4/5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">12</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – VM 網路相關設定 (4/5)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">防火牆設定</h3>
+                <p class="reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">Table 1. Component specific access url</p>
+                
+                <div class="table-container reveal">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">
+                        <thead>
+                            <tr style="background: rgba(212, 165, 116, 0.15);">
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Components</th>
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">URL</th>
+                                <th style="padding: clamp(0.9rem, 1.7vh, 1.2rem); text-align: left; border-bottom: 1px solid #d4a574;">Default port</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Concert</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">https://&lt;VM_FQDN&gt;:12443</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">12443</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">Concert Workflows</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">https://&lt;VM_FQDN&gt;:443/workflows/</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">443</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">Concert Data Apps</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">https://&lt;VM_FQDN&gt;:15443</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">15443</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(2rem, 4vh, 3rem); margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">開通防火牆端口</h3>
+                
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">firewall-cmd</span> --permanent --add-port=443/tcp<br>
+<span class="keyword">firewall-cmd</span> --permanent --add-port=12443/tcp<br>
+<span class="keyword">firewall-cmd</span> --permanent --add-port=15443/tcp
+                </div>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">重啟防火牆</h3>
+                
+                <div class="code-block reveal" style="font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">firewall-cmd</span> --reload
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 13: System Requirement - Storage Configuration (5/5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">13</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – Storage Configuration (5/5)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">硬碟空間需求</h3>
+                <ul class="content-list" style="margin-bottom: clamp(2rem, 4vh, 3rem); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">
+                    <li class="reveal">Docker : <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">/var/lib/docker</code></li>
+                    <li class="reveal">Podman : <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">/var/lib/containers</code> (for root user) and <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">~/.local/share/containers</code> (for rootless user)</li>
+                    <li class="reveal">K3s Container data : <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">/var/lib/rancher/k3s/agent/containerd</code></li>
+                    <li class="reveal">K3s Runtime data : <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">/run/k3s</code></li>
+                </ul>
+
+                <div class="reveal" style="padding: clamp(1rem, 2vh, 1.5rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(1.05rem, 1.7vw, 1.3rem); margin: 0;">確保預設的<strong>storage路徑都有最少50 GB的容量</strong></p>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">(Optional) 設定Storage替換路徑:</h3>
+                <p class="reveal" style="font-size: clamp(1.05rem, 1.7vw, 1.3rem); margin-bottom: 0;">如果root file system (/)的容量有限則替換storage path</p>
+                
+                <br><br><br><br><br><br><br>
+                
+                <div class="reveal" style="position: relative; left: 0; right: 0; text-align: left;">
+                    <p style="font-size: clamp(0.8rem, 1.3vw, 1rem); color: #9a9590; margin: 0;">
+                        [Setting up alternate storage path:
+                        <a href="https://www.ibm.com/docs/en/concert/2.3.x?topic=vm-setting-up-alternate-storage-path"
+                           target="_blank"
+                           style="color: #d4a574; text-decoration: none; border-bottom: 1px solid rgba(212, 165, 116, 0.3);">
+                            https://www.ibm.com/docs/en/concert/2.3.x?topic=vm-setting-up-alternate-storage-path
+                        </a>]
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 14: Prerequisites 標題頁 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">14</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">安裝前準備</div>
+                <h1 class="reveal">Prerequisites</h1>
+                <div class="ornament reveal"></div>
+                
+                <ul class="content-list" style="margin-top: clamp(3rem, 6vh, 4rem);">
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Prepare IBM Entitlement API Key</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Install Podman and K3s</li>
+                    <li class="reveal" style="font-size: clamp(1.3rem, 2.1vw, 1.6rem) !important;">Install Helm</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 15: Prerequisites - Licenses and Entitlements -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">15</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Prerequisites - Licenses and Entitlements</h2>
+                
+                <p class="reveal" style="font-size: clamp(1.1rem, 1.8vw, 1.4rem); margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    Prepare entitlement key
+                </p>
+                
+                <div class="reveal" style="margin-bottom: 0; text-align: center;">
+                    <img src="Snapshot/Entitlement-Key.png"
+                         alt="IBM Entitlement Key Screenshot"
+                         style="max-width: 100%; max-height: min(70vh, 600px); height: auto; border-radius: 8px; border: 1px solid rgba(212, 165, 116, 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
+                </div>
+                
+                <br><br><br><br><br><br><br>
+                
+                <div class="reveal" style="position: absolute; bottom: clamp(1rem, 2vh, 1.5rem); left: 0; right: 0; text-align: left;">
+                    <p style="font-size: clamp(0.8rem, 1.3vw, 1rem); color: #9a9590; margin: 0;">
+                        [container software library on My IBM:
+                        <a href="https://myibm.ibm.com/products-services/containerlibrary"
+                           target="_blank"
+                           style="color: #d4a574; text-decoration: none; border-bottom: 1px solid rgba(212, 165, 116, 0.3);">
+                            https://myibm.ibm.com/products-services/containerlibrary
+                        </a>]
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 16: Prerequisites - Container Runtime -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">16</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Prerequisites - Container Runtime</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Supported Container Runtime</h3>
+                <p class="reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(1.05rem, 1.7vw, 1.3rem);">Table 3. Supported Container runtime</p>
+                
+                <div class="table-container reveal" style="margin-bottom: clamp(2rem, 4vh, 3rem);">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1rem, 1.6vw, 1.25rem);">
+                        <thead>
+                            <tr style="background: rgba(212, 165, 116, 0.15);">
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">Container runtime</th>
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">Minimum Recommended Version</th>
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">Podman</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">4.4.5</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">CNI has been deprecated as a Podman networking plug-in; switch to Netavark</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); font-weight: 600; color: #d4a574;">Docker</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">24.0.5</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Install Podman (RHEL 9)</h3>
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>1. 安裝 Podman</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">sudo</span> <span class="keyword">dnf</span> install -y podman && <span class="keyword">podman</span> --version
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>2. (Optional) 初始化 Podman 及啟動 Podman Machine</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">podman</span> machine init<br>
+<span class="keyword">podman</span> machine start
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>3. 驗證 Podman 服務</strong></p>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">podman</span> info
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 17: Prerequisites - Install K3s (Step 1) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">17</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Prerequisites - Install K3s (1/2)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Step 1: Download and Install K3s</h3>
+                
+                <p class="reveal" style="margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">下載並執行 K3s 安裝腳本:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">curl</span> -sfL https://get.k3s.io | <span class="keyword">sudo</span> INSTALL_K3S_VERSION=<span class="string">v1.33.4+k3s1</span> <span class="keyword">sh</span> -s - --write-kubeconfig-mode <span class="string">644</span> --disable traefik
+                </div>
+
+                <div class="reveal" style="padding: clamp(1rem, 2vh, 1.5rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: 0.8rem;"><strong>參數說明:</strong></p>
+                    <ul style="list-style: none; padding-left: 0; font-size: clamp(0.95rem, 1.55vw, 1.15rem); line-height: 1.7;">
+                        <li style="margin-bottom: 0.5rem;">• <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">INSTALL_K3S_VERSION=v1.33.4+k3s1</code> — 指定 K3s 版本</li>
+                        <li style="margin-bottom: 0.5rem;">• <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">--write-kubeconfig-mode 644</code> — 設定 kubeconfig 檔案權限</li>
+                        <li>• <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">--disable traefik</code> — 停用預設的 Traefik ingress controller</li>
+                    </ul>
+                </div>
+
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); color: #9a9590;">安裝完成後,K3s 服務會自動啟動</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 17-2: Prerequisites - Install K3s (Step 2 & 3) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">17</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Prerequisites - Install K3s (2/2)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Step 2: Configure kubectl Access</h3>
+                
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);">設定 KUBECONFIG 環境變數:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">echo</span> <span class="string">"export KUBECONFIG=/etc/rancher/k3s/k3s.yaml"</span> >> ~/.bashrc && <span class="keyword">source</span> ~/.bashrc
+                </div>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">Step 3: Verify K3s Installation</h3>
+                
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>a) 檢查 K3s 版本</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">k3s</span> --version
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>b) 檢查 K3s 服務狀態</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">sudo</span> <span class="keyword">systemctl</span> status k3s
+                </div>
+
+                <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>c) 檢查節點狀態</strong></p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">kubectl</span> get nodes
+                </div>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574;">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>預期結果:</strong> 節點狀態應顯示為 <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">Ready</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 18: Prerequisites - Install Helm -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">18</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Prerequisites - Install Helm</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">1. Download Helm installation script</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">curl</span> -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o get-helm.sh
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">2. Make the script executable</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">chmod</span> +x get-helm.sh
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">3. Install Helm</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">sudo</span> ./get-helm.sh
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">4. Verify installation</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
+<span class="keyword">helm</span> version
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 19: Concert & Concert Workflow Air-gapped Installation 標題頁 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">19</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">離線環境部署</div>
+                <h1 class="reveal" style="font-size: clamp(2.5rem, 6vw, 5.5rem);">Concert & Concert Workflow<br>Air-gapped Installation</h1>
+                <div class="ornament reveal"></div>
+                <p class="subtitle reveal">在無網路連線的環境中安全部署</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 20: Step 1 - 下載安裝檔案 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">20</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1: 下載安裝檔案</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 下載 Concert 安裝包</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">wget</span> https://github.com/IBM/concert-install/archive/refs/tags/<span class="string">v2.3.0</span>.tar.gz
+<span class="keyword">tar</span> -xzf v2.3.0.tar.gz
+<span class="keyword">cd</span> concert-install-2.3.0
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 準備映像清單</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">執行腳本生成映像清單:</p>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">./scripts/generate-image-list.sh</span> > images.txt
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 21: Step 2 - 下載容器映像 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">21</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 2: 下載容器映像</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 登入 IBM Container Registry</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">export</span> IBM_ENTITLEMENT_KEY=<span class="string"><your-entitlement-key></span>
+<span class="keyword">echo</span> <span class="string">$IBM_ENTITLEMENT_KEY</span> | <span class="keyword">podman</span> login cp.icr.io -u cp --password-stdin
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 下載所有映像</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">./scripts/download-images.sh</span> images.txt ./concert-images
+                </div>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574;">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>注意:</strong> 下載過程可能需要較長時間,取決於網路速度
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 22: Step 3 - 傳輸到 Air-gapped 環境 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">22</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 傳輸到 Air-gapped 環境</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 打包映像和安裝檔案</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">tar</span> -czf concert-airgap-bundle.tar.gz concert-install-2.3.0/ concert-images/
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 傳輸到目標環境</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">使用安全的方式傳輸檔案:</p>
+                <ul class="content-list" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem);">
+                    <li class="reveal">USB 儲存裝置</li>
+                    <li class="reveal">安全檔案傳輸協議</li>
+                    <li class="reveal">其他經批准的傳輸方式</li>
+                </ul>
+
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.2rem, 2.5vh, 1.8rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 在目標環境解壓</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">tar</span> -xzf concert-airgap-bundle.tar.gz
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 23: Step 4 - 載入映像到本地 Registry -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">23</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 4: 載入映像到本地 Registry</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 設定本地 Registry 變數</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">export</span> LOCAL_REGISTRY=<span class="string"><your-registry-url></span>
+<span class="keyword">export</span> LOCAL_REGISTRY_USER=<span class="string"><username></span>
+<span class="keyword">export</span> LOCAL_REGISTRY_PASSWORD=<span class="string"><password></span>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 登入本地 Registry</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">echo</span> <span class="string">$LOCAL_REGISTRY_PASSWORD</span> | <span class="keyword">podman</span> login <span class="string">$LOCAL_REGISTRY</span> -u <span class="string">$LOCAL_REGISTRY_USER</span> --password-stdin
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 上傳映像</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">./scripts/upload-images.sh</span> concert-images/ <span class="string">$LOCAL_REGISTRY</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 24: Step 5 - 執行安裝 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">24</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 5: 執行安裝</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 修改安裝配置</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">編輯 <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">values.yaml</code> 指向本地 Registry:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.8rem, 1.3vw, 1rem);">
+<span class="keyword">global:</span>
+  <span class="keyword">imageRegistry:</span> <span class="string"><your-registry-url></span>
+  <span class="keyword">imagePullSecrets:</span>
+    - <span class="string">local-registry-secret</span>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 執行安裝腳本</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">./install.sh</span> --airgap --registry <span class="string">$LOCAL_REGISTRY</span>
+                </div>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574;">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>提示:</strong> 安裝過程約需 15-30 分鐘
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 25: Step 6 - 驗證安裝 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">25</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 6: 驗證安裝</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 檢查 Pod 狀態</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">kubectl</span> get pods -n concert
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 檢查服務狀態</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">kubectl</span> get svc -n concert
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 訪問 Concert UI</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem);">取得訪問 URL:</p>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">echo</span> <span class="string">"https://$(kubectl get svc concert-ui -n concert -o jsonpath='{.status.loadBalancer.ingress[0].ip}'):12443"</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 26: Use Case 1 標題頁 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">26</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">實際應用案例</div>
+                <h1 class="reveal" style="font-size: clamp(2.2rem, 5.5vw, 5rem);">Use Case 1:<br>Get Certificate List from Vault<br>via Concert Workflow</h1>
+                <div class="ornament reveal"></div>
+                <p class="subtitle reveal">透過 Concert Workflow 從 Vault 取得憑證清單</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 27: Use Case 2 標題頁 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">27</div>
+                <div class="rule reveal"></div>
+                <div class="eyebrow reveal">實際應用案例</div>
+                <h1 class="reveal" style="font-size: clamp(2.2rem, 5.5vw, 5rem);">Use Case 2:<br>External Certificate Renewal<br>via Concert Workflow & Vault</h1>
+                <div class="ornament reveal"></div>
+                <p class="subtitle reveal">使用 Concert Workflow 與 Vault 進行外部憑證更新</p>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        /* ===========================================
+           SLIDE PRESENTATION CONTROLLER
+           =========================================== */
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.setupNavDots();
+                this.setupIntersectionObserver();
+                this.setupKeyboardNav();
+            }
+
+            setupNavDots() {
+                const navDotsContainer = document.querySelector('.nav-dots');
+                navDotsContainer.innerHTML = '';
+                
+                this.slides.forEach((slide, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = 'nav-dot' + (index === 0 ? ' active' : '');
+                    dot.addEventListener('click', () => {
+                        this.slides[index].scrollIntoView({ behavior: 'smooth' });
+                    });
+                    navDotsContainer.appendChild(dot);
+                });
+                
+                this.navDots = document.querySelectorAll('.nav-dot');
+            }
+
+            setupIntersectionObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const slideIndex = Array.from(this.slides).indexOf(entry.target);
+                            this.navDots.forEach((dot, index) => {
+                                dot.classList.toggle('active', index === slideIndex);
+                            });
+                            this.currentSlide = slideIndex;
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.getAttribute('contenteditable')) return;
+                    
+                    if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                        return;
+                    }
+                    
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        if (this.currentSlide < this.slides.length - 1) {
+                            this.slides[this.currentSlide + 1].scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        if (this.currentSlide > 0) {
+                            this.slides[this.currentSlide - 1].scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('Fullscreen error:', err);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+        }
+
+        /* ===========================================
+           INLINE EDITOR
+           =========================================== */
+        class InlineEditor {
+            constructor() {
+                this.isActive = false;
+                this.editToggle = document.getElementById('editToggle');
+                this.editBanner = document.querySelector('.edit-banner');
+                this.hotzone = document.querySelector('.edit-hotzone');
+                this.hideTimeout = null;
+                this.setupEditMode();
+                this.setupHotzone();
+            }
+
+            setupEditMode() {
+                this.editToggle.addEventListener('click', () => this.toggleEditMode());
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'e' || e.key === 'E') {
+                        if (!e.target.getAttribute('contenteditable')) {
+                            this.toggleEditMode();
+                        }
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                        e.preventDefault();
+                        this.saveContent();
+                    }
+                });
+            }
+
+            setupHotzone() {
+                this.hotzone.addEventListener('mouseenter', () => {
+                    clearTimeout(this.hideTimeout);
+                    this.editBanner.classList.add('visible');
+                });
+
+                this.editBanner.addEventListener('mouseenter', () => {
+                    clearTimeout(this.hideTimeout);
+                });
+
+                this.editBanner.addEventListener('mouseleave', () => {
+                    this.hideTimeout = setTimeout(() => {
+                        if (!this.isActive) {
+                            this.editBanner.classList.remove('visible');
+                        }
+                    }, 2000);
+                });
+            }
+
+            toggleEditMode() {
+                this.isActive = !this.isActive;
+                document.body.classList.toggle('edit-mode', this.isActive);
+                this.editToggle.textContent = this.isActive ? '✓ 編輯模式' : '編輯模式';
+                
+                const editableElements = document.querySelectorAll('h1, h2, h3, p, li');
+                editableElements.forEach(el => {
+                    if (this.isActive) {
+                        el.setAttribute('contenteditable', 'true');
+                        el.addEventListener('blur', () => this.saveContent());
+                    } else {
+                        el.removeAttribute('contenteditable');
+                    }
+                });
+
+                if (this.isActive) {
+                    this.loadContent();
+                }
+            }
+
+            saveContent() {
+                const content = document.querySelector('.slides-container').innerHTML;
+                localStorage.setItem('concert-slides-content', content);
+                console.log('Content saved to localStorage');
+            }
+
+            loadContent() {
+                const saved = localStorage.getItem('concert-slides-content');
+                if (saved) {
+                    const shouldLoad = confirm('發現已儲存的內容，要載入嗎？');
+                    if (shouldLoad) {
+                        document.querySelector('.slides-container').innerHTML = saved;
+                        new SlidePresentation();
+                    }
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            new SlidePresentation();
+            new InlineEditor();
+        });
+    </script>
+</body>
+</html>
+
+    <!-- Slide 18: 引用投影片 - 最佳實踐 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="text-align: center;">
+                <div class="ornament reveal"></div>
+                
+                <blockquote class="reveal" style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-style: italic; color: #e8e4df; line-height: 1.5; margin: clamp(2rem, 4vh, 3rem) auto; max-width: 800px; position: relative;">
+                    <span style="color: #d4a574; font-size: 1.5em; line-height: 0; position: relative; top: 0.2em;">"</span>
+                    自動化不僅僅是關於速度,<br>
+                    更是關於一致性和可靠性
+                    <span style="color: #d4a574; font-size: 1.5em; line-height: 0; position: relative; top: 0.2em;">"</span>
+                </blockquote>
+                
+                <div class="ornament reveal"></div>
+                
+                <p class="reveal" style="font-size: clamp(1.1rem, 1.8vw, 1.4rem); color: #9a9590; margin-top: clamp(2rem, 4vh, 3rem); font-weight: 500;">
+                    — DevOps 最佳實踐
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 19: 部署方式比較表 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">19</div>
+                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">部署方式比較</h2>
+                
+                <div class="table-container reveal">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1rem, 1.6vw, 1.25rem);">
+                        <thead>
+                            <tr style="background: rgba(212, 165, 116, 0.15);">
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">部署方式</th>
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">優點</th>
+                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">適用場景</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">SaaS</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">快速部署、自動更新</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">快速驗證、小型團隊</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">OpenShift</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">企業級、高可用性</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">生產環境、大規模</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">EKS</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">AWS 整合、彈性擴展</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">AWS 環境、雲原生</td>
+                            </tr>
+                            <tr style="background: rgba(212, 165, 116, 0.05);">
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); font-weight: 600; color: #d4a574;">VM</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">簡單、低門檻</td>
+                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">測試環境、POC</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 20: 實施時間軸 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">20</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">典型實施時間軸</h2>
+                
+                <div style="position: relative; padding-left: clamp(2rem, 4vw, 3rem);">
+                    <!-- Timeline line -->
+                    <div style="position: absolute; left: clamp(0.5rem, 1vw, 0.8rem); top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #d4a574, rgba(212, 165, 116, 0.3));"></div>
+                    
+                    <!-- Week 1 -->
+                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
+                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 1-2: 規劃與準備</h3>
+                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">需求分析、架構設計、資源準備</p>
+                    </div>
+                    
+                    <!-- Week 3 -->
+                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
+                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 3-4: 基礎設施部署</h3>
+                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">VM/集群準備、網路配置、儲存設定</p>
+                    </div>
+                    
+                    <!-- Week 5 -->
+                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
+                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 5-6: Concert 安裝</h3>
+                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">安裝 Concert、Workflows、驗證功能</p>
+                    </div>
+                    
+                    <!-- Week 7 -->
+                    <div class="reveal" style="position: relative;">
+                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
+                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 7-8: 整合與測試</h3>
+                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">連接器配置、工作流程開發、UAT</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 21: 總結與下一步 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number">21</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574;">總結與下一步</h2>
+                
+                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
+                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">✅ 今天學到的</h3>
+                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Concert 的核心功能與架構</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">多種部署方式的選擇與比較</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">系統需求與環境準備</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Air-gapped 環境的安裝流程</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem);">
+                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">🚀 下一步行動</h3>
+                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">實際動手安裝 Concert</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">探索 Vault 整合的實際案例</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">開發自定義工作流程</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
