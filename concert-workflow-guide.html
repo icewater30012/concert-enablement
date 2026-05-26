@@ -129,14 +129,15 @@
 
         .chapter-number {
             position: absolute;
-            top: 0;
-            left: 0;
+            bottom: clamp(1.5rem, 3vh, 2.5rem);
+            right: clamp(2rem, 4vw, 3rem);
             font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(2rem, 5vw, 4rem);
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
             font-weight: 600;
             color: #d4a574;
-            opacity: 0.4;
+            opacity: 0.5;
             line-height: 1;
+            z-index: 10;
         }
 
         .accent-line {
@@ -326,7 +327,6 @@
     <section class="slide visible">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">01</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">技術教學系列</div>
                 <h1 class="reveal">Concert Enablement</h1>
@@ -346,7 +346,7 @@
     <!-- Slide 2: Outline -->
     <section class="slide">
         <div class="slide-content">
-            <div class="content-wrapper">
+            <div class="content-wrapper" style="position: relative;">
                 <div class="accent-line"></div>
                 <h2 class="reveal" style="color: #d4a574;">Outline</h2>
                 <ul class="content-list">
@@ -387,8 +387,8 @@
     <!-- Slide 4: Concert Briefing - 核心功能 -->
     <section class="slide">
         <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">04</div>
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">04</div>
                 <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">Concert 核心功能</h2>
                 
                 <div class="feature-grid">
@@ -429,8 +429,8 @@
     <!-- Slide 5: Concert Workflows 簡介 -->
     <section class="slide">
         <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">05</div>
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">05</div>
                 <div class="accent-line"></div>
                 <h2 class="reveal" style="color: #d4a574;">Concert Workflows</h2>
                 
@@ -454,8 +454,8 @@
     <!-- Slide 6: Concert 架構概覽 -->
     <section class="slide">
         <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">06</div>
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">06</div>
                 <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(1.5rem, 3vh, 2rem);">Concert 架構概覽</h2>
                 
                 <div style="margin-top: clamp(2rem, 4vh, 3rem);">
@@ -476,7 +476,6 @@
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">07</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">部署與系統需求</div>
                 <h1 class="reveal">Deployment Methods<br>& System Requirement</h1>
@@ -489,8 +488,8 @@
     <!-- Slide 8: Concert Deployment Methods -->
     <section class="slide">
         <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">08</div>
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">08</div>
                 <div class="accent-line"></div>
                 <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">
                     Concert Deployment Methods
@@ -720,7 +719,6 @@ net.ipv6.conf.default.disable_ipv6 = 0
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">14</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">安裝前準備</div>
                 <h1 class="reveal">Prerequisites</h1>
@@ -924,7 +922,6 @@ net.ipv6.conf.default.disable_ipv6 = 0
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">19</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">離線環境部署</div>
                 <h1 class="reveal" style="font-size: clamp(2.5rem, 6vw, 5.5rem);">Concert & Concert Workflow<br>Air-gapped Installation</h1>
@@ -1099,7 +1096,6 @@ net.ipv6.conf.default.disable_ipv6 = 0
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">26</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">實際應用案例</div>
                 <h1 class="reveal" style="font-size: clamp(2.2rem, 5.5vw, 5rem);">Use Case 1:<br>Get Certificate List from Vault<br>via Concert Workflow</h1>
@@ -1113,12 +1109,44 @@ net.ipv6.conf.default.disable_ipv6 = 0
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper" style="position: relative;">
-                <div class="chapter-number reveal">27</div>
                 <div class="rule reveal"></div>
                 <div class="eyebrow reveal">實際應用案例</div>
                 <h1 class="reveal" style="font-size: clamp(2.2rem, 5.5vw, 5rem);">Use Case 2:<br>External Certificate Renewal<br>via Concert Workflow & Vault</h1>
                 <div class="ornament reveal"></div>
                 <p class="subtitle reveal">使用 Concert Workflow 與 Vault 進行外部憑證更新</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Slide 28: 總結與下一步 -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper" style="position: relative;">
+                <div class="chapter-number reveal">28</div>
+                <div class="accent-line"></div>
+                <h2 class="reveal" style="color: #d4a574;">總結與下一步</h2>
+                
+                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
+                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(2rem, 4vh, 3rem);">
+                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">✅ 今天學到的</h3>
+                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Concert 的核心功能與架構</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">多種部署方式的選擇與比較</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">系統需求與環境準備</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Air-gapped 環境的安裝流程</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem);">
+                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">🚀 下一步行動</h3>
+                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">實際動手安裝 Concert</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">探索 Vault 整合的實際案例</li>
+                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">開發自定義工作流程</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1301,145 +1329,3 @@ net.ipv6.conf.default.disable_ipv6 = 0
     </script>
 </body>
 </html>
-
-    <!-- Slide 18: 引用投影片 - 最佳實踐 -->
-    <section class="slide">
-        <div class="slide-content">
-            <div class="content-wrapper" style="text-align: center;">
-                <div class="ornament reveal"></div>
-                
-                <blockquote class="reveal" style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-style: italic; color: #e8e4df; line-height: 1.5; margin: clamp(2rem, 4vh, 3rem) auto; max-width: 800px; position: relative;">
-                    <span style="color: #d4a574; font-size: 1.5em; line-height: 0; position: relative; top: 0.2em;">"</span>
-                    自動化不僅僅是關於速度,<br>
-                    更是關於一致性和可靠性
-                    <span style="color: #d4a574; font-size: 1.5em; line-height: 0; position: relative; top: 0.2em;">"</span>
-                </blockquote>
-                
-                <div class="ornament reveal"></div>
-                
-                <p class="reveal" style="font-size: clamp(1.1rem, 1.8vw, 1.4rem); color: #9a9590; margin-top: clamp(2rem, 4vh, 3rem); font-weight: 500;">
-                    — DevOps 最佳實踐
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Slide 19: 部署方式比較表 -->
-    <section class="slide">
-        <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">19</div>
-                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">部署方式比較</h2>
-                
-                <div class="table-container reveal">
-                    <table style="width: 100%; border-collapse: collapse; background: rgba(212, 165, 116, 0.05); font-size: clamp(1rem, 1.6vw, 1.25rem);">
-                        <thead>
-                            <tr style="background: rgba(212, 165, 116, 0.15);">
-                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">部署方式</th>
-                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">優點</th>
-                                <th style="padding: clamp(0.8rem, 1.5vh, 1rem); text-align: left; border-bottom: 1px solid #d4a574;">適用場景</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">SaaS</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">快速部署、自動更新</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">快速驗證、小型團隊</td>
-                            </tr>
-                            <tr style="background: rgba(212, 165, 116, 0.05);">
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">OpenShift</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">企業級、高可用性</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">生產環境、大規模</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2); font-weight: 600; color: #d4a574;">EKS</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">AWS 整合、彈性擴展</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); border-bottom: 1px solid rgba(212, 165, 116, 0.2);">AWS 環境、雲原生</td>
-                            </tr>
-                            <tr style="background: rgba(212, 165, 116, 0.05);">
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem); font-weight: 600; color: #d4a574;">VM</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">簡單、低門檻</td>
-                                <td style="padding: clamp(0.8rem, 1.5vh, 1rem);">測試環境、POC</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Slide 20: 實施時間軸 -->
-    <section class="slide">
-        <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">20</div>
-                <div class="accent-line"></div>
-                <h2 class="reveal" style="color: #d4a574; margin-bottom: clamp(2rem, 4vh, 3rem);">典型實施時間軸</h2>
-                
-                <div style="position: relative; padding-left: clamp(2rem, 4vw, 3rem);">
-                    <!-- Timeline line -->
-                    <div style="position: absolute; left: clamp(0.5rem, 1vw, 0.8rem); top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #d4a574, rgba(212, 165, 116, 0.3));"></div>
-                    
-                    <!-- Week 1 -->
-                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
-                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
-                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 1-2: 規劃與準備</h3>
-                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">需求分析、架構設計、資源準備</p>
-                    </div>
-                    
-                    <!-- Week 3 -->
-                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
-                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
-                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 3-4: 基礎設施部署</h3>
-                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">VM/集群準備、網路配置、儲存設定</p>
-                    </div>
-                    
-                    <!-- Week 5 -->
-                    <div class="reveal" style="position: relative; margin-bottom: clamp(2rem, 4vh, 3rem);">
-                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
-                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 5-6: Concert 安裝</h3>
-                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">安裝 Concert、Workflows、驗證功能</p>
-                    </div>
-                    
-                    <!-- Week 7 -->
-                    <div class="reveal" style="position: relative;">
-                        <div style="position: absolute; left: calc(-1 * clamp(2rem, 4vw, 3rem) + clamp(0.5rem, 1vw, 0.8rem)); top: 0.5em; width: 12px; height: 12px; background: #d4a574; border-radius: 50%; transform: translateX(-50%);"></div>
-                        <h3 style="color: #d4a574; font-size: clamp(1.2rem, 2vw, 1.6rem); margin-bottom: 0.5rem;">Week 7-8: 整合與測試</h3>
-                        <p style="font-size: clamp(1rem, 1.6vw, 1.25rem); color: #c9d1d9; line-height: 1.6;">連接器配置、工作流程開發、UAT</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Slide 21: 總結與下一步 -->
-    <section class="slide">
-        <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number">21</div>
-                <div class="accent-line"></div>
-                <h2 class="reveal" style="color: #d4a574;">總結與下一步</h2>
-                
-                <div style="margin-top: clamp(2rem, 4vh, 3rem);">
-                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(2rem, 4vh, 3rem);">
-                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">✅ 今天學到的</h3>
-                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Concert 的核心功能與架構</li>
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">多種部署方式的選擇與比較</li>
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">系統需求與環境準備</li>
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">Air-gapped 環境的安裝流程</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="reveal" style="background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px; padding: clamp(1.5rem, 3vh, 2rem);">
-                        <h3 style="color: #d4a574; font-size: clamp(1.3rem, 2.2vw, 1.8rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">🚀 下一步行動</h3>
-                        <ul class="content-list" style="gap: clamp(0.8rem, 1.5vh, 1.2rem);">
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">實際動手安裝 Concert</li>
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">探索 Vault 整合的實際案例</li>
-                            <li style="font-size: clamp(1.05rem, 1.7vw, 1.3rem) !important;">開發自定義工作流程</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
