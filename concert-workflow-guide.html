@@ -598,6 +598,10 @@
                 <div class="chapter-number">12</div>
                 <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">System Requirement – VM 網路相關設定 (3/5)</h2>
                 
+                <div class="reveal" style="margin-top: clamp(1rem, 2vh, 1.5rem); margin-bottom: clamp(1rem, 2vh, 1.5rem); padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db; font-size: clamp(0.95rem, 1.55vw, 1.15rem);">
+                    <p style="margin: 0;"><strong>Note:</strong> The requirement to enable IPv6 on your operating system applies only to versions 2.3.1.0 and earlier of Concert Workflows.</p>
+                </div>
+                
                 <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.2rem, 2.5vh, 1.8rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1rem, 1.6vw, 1.25rem);">Verify IPv6 is enabled on you Concert Workflows if it is disabled</h3>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.9rem, 1.5vw, 1.1rem);">
 <span class="keyword">ip</span> -6 <span class="keyword">addr</span> show
@@ -612,7 +616,7 @@
 
                 <p class="reveal" style="margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem); font-size: clamp(0.95rem, 1.55vw, 1.15rem);"><strong>b) Add or uncomment these lines.</strong></p>
                 <div class="code-block reveal" style="margin-bottom: clamp(1rem, 2vh, 1.5rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-net.ipv6.conf.all.disable_ipv6 = 0
+net.ipv6.conf.all.disable_ipv6 = 0<br>
 net.ipv6.conf.default.disable_ipv6 = 0
                 </div>
 
@@ -940,162 +944,452 @@ net.ipv6.conf.default.disable_ipv6 = 0
         </div>
     </section>
 
-    <!-- Slide 22: Step 1 - 下載安裝檔案 -->
+    <!-- Slide 20: Step 1 - 在有網路連線的 VM 上下載映像 (1) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">20</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1: 在有網路連線的 VM 上下載映像</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 下載軟體套件</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">wget</span> https://github.com/IBM/Concert/releases/download/v2.3.1/ibm-concert-x86.tar.gz
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 設定預設權限</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">umask</span> 0022
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 解壓縮安裝套件</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">tar</span> -xzf ibm-concert-x86.tar.gz<br>
+<span class="keyword">cd</span> ibm-concert
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 21: Step 1 (續) - 下載 K3s 元件和 Helm -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">21</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1 (續): 下載 K3s 元件和 Helm</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">設定環境變數並下載元件</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.65rem, 1.1vw, 0.85rem); line-height: 1.6;">
+<span class="comment"># 設定版本變數</span><br>
+<span class="keyword">export</span> K3S_RELEASE_VER=v1.33.4+k3s1<br>
+<span class="keyword">export</span> HELM_VERSION=v3.20.0<br>
+<br>
+<span class="comment"># 建立前置目錄</span><br>
+<span class="keyword">mkdir</span> -p prerequisites<br>
+<br>
+<span class="comment"># 下載 K3s binary</span><br>
+K3S_RELEASE_VER_ENCODE=$(<span class="keyword">echo</span> $K3S_RELEASE_VER | <span class="keyword">sed</span> <span class="string">'s/+/%2B/g'</span>)<br>
+<span class="keyword">curl</span> -Lo ./prerequisites/k3s https://github.com/k3s-io/k3s/releases/download/<span class="string">${K3S_RELEASE_VER_ENCODE}</span>/k3s<br>
+<span class="keyword">chmod</span> a+x ./prerequisites/k3s<br>
+<br>
+<span class="comment"># 下載 K3s airgap images</span><br>
+K3S_RELEASE_VER_SHORT=$(<span class="keyword">echo</span> $K3S_RELEASE_VER | <span class="keyword">sed</span> <span class="string">'s/+.*//g'</span>)<br>
+<span class="keyword">curl</span> -Lo ./prerequisites/k3s-airgap-images-amd64.tar.zst https://github.com/k3s-io/k3s/releases/download/<span class="string">${K3S_RELEASE_VER_SHORT}</span>%2Bk3s1/k3s-airgap-images-amd64.tar.zst<br>
+<br>
+<span class="comment"># 下載 K3s install script</span><br>
+<span class="keyword">curl</span> -Lo ./prerequisites/install.sh https://get.k3s.io/<br>
+<span class="keyword">chmod</span> a+x ./prerequisites/install.sh<br>
+<br>
+<span class="comment"># 下載 Helm</span><br>
+helm_download_name=helm-<span class="string">${HELM_VERSION}</span>-linux-amd64.tar.gz<br>
+<span class="keyword">curl</span> -Lo ./prerequisites/<span class="string">${helm_download_name}</span> https://get.helm.sh/<span class="string">${helm_download_name}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 22: Step 1 (續) - 設定產品安裝參數 -->
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper">
                 <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">22</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1: 下載安裝檔案</h2>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1 (續): 設定產品安裝參數</h2>
                 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 下載 Concert 安裝包</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">建立或編輯 etc/params.ini 檔案來指定要安裝的產品</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">可以從 <code>etc/sample-params/concert-workflows-vm-quick-start-params.ini</code> 複製到 <code>etc/params.ini</code></p>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">wget</span> https://github.com/IBM/concert-install/archive/refs/tags/<span class="string">v2.3.0</span>.tar.gz
-<span class="keyword">tar</span> -xzf v2.3.0.tar.gz
-<span class="keyword">cd</span> concert-install-2.3.0
+<span class="comment"># 設定要安裝的產品為 TRUE</span><br>
+INSTALL_CONCERT=TRUE<br>
+INSTALL_DATAAPPS=FALSE<br>
+INSTALL_WORKFLOWS=TRUE
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 準備映像清單</h3>
-                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">執行腳本生成映像清單:</p>
-                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">./scripts/generate-image-list.sh</span> > images.txt
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Slide 23: Step 2 - 下載容器映像 -->
-    <section class="slide">
-        <div class="slide-content">
-            <div class="content-wrapper">
-                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">23</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 2: 下載容器映像</h2>
-                
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 登入 IBM Container Registry</h3>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">export</span> IBM_ENTITLEMENT_KEY=<span class="string"><your-entitlement-key></span>
-<span class="keyword">echo</span> <span class="string">$IBM_ENTITLEMENT_KEY</span> | <span class="keyword">podman</span> login cp.icr.io -u cp --password-stdin
-                </div>
-
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 下載所有映像</h3>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">./scripts/download-images.sh</span> images.txt ./concert-images
-                </div>
-
-                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574;">
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
                     <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
-                        <strong>注意:</strong> 下載過程可能需要較長時間,取決於網路速度
+                        <strong>注意:</strong> 如果 etc/params.ini 不存在,腳本會下載所有支援產品的容器映像
+                    </p>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">匯出 IBM Entitlement Key</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">export</span> REG_PASS=<span class="string"><your-entitlement-key></span>
+                </div>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107; margin-top: clamp(1rem, 2vh, 1.5rem);">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>重要:</strong> 請妥善保管您的 entitlement key,不要提交到版本控制系統
+                    </p>
+                </div>
+
+                <br><br>
+
+                <div class="reveal" style="position: absolute; bottom: clamp(1rem, 2vh, 1.5rem); left: 0; right: 0; text-align: left;">
+                    <p style="font-size: clamp(0.8rem, 1.3vw, 1rem); color: #9a9590; margin: 0;">
+                        [Sample params.ini files:
+                        <a href="https://www.ibm.com/docs/en/concert/2.3.x?topic=deployment-configuring-paramsini-file"
+                           target="_blank"
+                           style="color: #d4a574; text-decoration: none; border-bottom: 1px solid rgba(212, 165, 116, 0.3);">
+                            https://www.ibm.com/docs/en/concert/2.3.x?topic=deployment-configuring-paramsini-file
+                        </a>]
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Slide 24: Step 3 - 傳輸到 Air-gapped 環境 -->
+    <!-- Slide 23: Step 1 (續) - 下載映像並建立封存檔 -->
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper">
-                <div class="chapter-number">24</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 傳輸到 Air-gapped 環境</h2>
+
+
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">23</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 1 (續): 下載映像並建立封存檔</h2>
                 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 打包映像和安裝檔案</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">執行 manage-images 腳本下載映像</h3>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">tar</span> -czf concert-airgap-bundle.tar.gz concert-install-2.3.0/ concert-images/
+./bin/manage-images --save
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 傳輸到目標環境</h3>
-                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">使用安全的方式傳輸檔案:</p>
-                <ul class="content-list" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem);">
-                    <li class="reveal">USB 儲存裝置</li>
-                    <li class="reveal">安全檔案傳輸協議</li>
-                    <li class="reveal">其他經批准的傳輸方式</li>
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.85rem, 1.4vw, 1.05rem); margin: 0;">
+                        <strong>注意:</strong> 容器映像會從 registry 拉取並儲存到 <code>images/<version>/</code> 目錄的壓縮封存檔中。每個產品會有各自的封存檔,如 <code>images-hub.tar.gz</code>, <code>images-concert.tar.gz</code>, <code>images-dataapps.tar.gz</code>, <code>images-workflows.tar.gz</code>
+                    </p>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">驗證映像封存檔已建立</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">ls</span> -lh images/*/
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">建立完整封存檔</h3>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem); margin-bottom: clamp(1rem, 2vh, 1.5rem);">
+<span class="keyword">cd</span> ..<br>
+<span class="keyword">tar</span> -czf ibm-concert-x86-airgap.tar.gz ibm-concert/
+                </div>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>重要:</strong> 封存檔會很大 (10 到 40 GB,取決於選擇的產品)。請確保有足夠的磁碟空間
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 24: Step 2 - 傳輸壓縮包到離線 VM -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">24</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 2: 傳輸壓縮包到離線 VM</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">方法 1: 網路傳輸</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">如果兩台 VM 可以通訊:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">scp</span> ibm-concert-x86-airgap.tar.gz user@vmb.example.com:/path/to/destination/
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">方法 2: 可攜式硬碟</h3>
+                <ul class="content-list reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem);">
+                    <li class="reveal">將壓縮包複製到 USB 或外接硬碟</li>
+                    <li class="reveal">將 USB 或外接硬碟連接到離線 VM</li>
+                    <li class="reveal">將壓縮包複製到目標位置</li>
                 </ul>
 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.2rem, 2.5vh, 1.8rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 在目標環境解壓</h3>
-                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">tar</span> -xzf concert-airgap-bundle.tar.gz
-                </div>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">方法 3: 共享儲存</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem);">複製到兩台 VM 都可存取的網路儲存空間</p>
             </div>
         </div>
     </section>
 
-    <!-- Slide 25: Step 4 - 載入映像到本地 Registry -->
+    <!-- Slide 25: Step 3 - 在離線 VM 上安裝 (1) -->
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper">
-                <div class="chapter-number">25</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 4: 載入映像到本地 Registry</h2>
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">25</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (1)</h2>
                 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 設定本地 Registry 變數</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 啟用 systemd user linger</h3>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">export</span> LOCAL_REGISTRY=<span class="string"><your-registry-url></span>
-<span class="keyword">export</span> LOCAL_REGISTRY_USER=<span class="string"><username></span>
-<span class="keyword">export</span> LOCAL_REGISTRY_PASSWORD=<span class="string"><password></span>
+<span class="keyword">loginctl</span> enable-linger &lt;USER&gt;
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 登入本地 Registry</h3>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">echo</span> <span class="string">$LOCAL_REGISTRY_PASSWORD</span> | <span class="keyword">podman</span> login <span class="string">$LOCAL_REGISTRY</span> -u <span class="string">$LOCAL_REGISTRY_USER</span> --password-stdin
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.85rem, 1.4vw, 1.05rem); margin: 0;">
+                        <strong>注意:</strong> <code><user></code> 是指安裝 IBM Concert 的 root 或 non-root 帳號。Linger 確保與此使用者相關的服務和程序在系統啟動時自動啟動,並在會話終止後保持活動狀態
+                    </p>
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 上傳映像</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 設定預設權限</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">umask</span> 0022
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 解壓縮封存檔</h3>
                 <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">./scripts/upload-images.sh</span> concert-images/ <span class="string">$LOCAL_REGISTRY</span>
+<span class="keyword">tar</span> -xzf ibm-concert-x86-airgap.tar.gz<br>
+<span class="keyword">cd</span> ibm-concert
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Slide 26: Step 5 - 執行安裝 -->
+    <!-- Slide 26: Step 3 - 在離線 VM 上安裝 (2) -->
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper">
                 <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">26</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 5: 執行安裝</h2>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (2)</h2>
                 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 修改安裝配置</h3>
-                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">編輯 <code style="background: rgba(212, 165, 116, 0.2); padding: 0.2em 0.5em; border-radius: 3px; color: #d4a574;">values.yaml</code> 指向本地 Registry:</p>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.8rem, 1.3vw, 1rem);">
-<span class="keyword">global:</span>
-  <span class="keyword">imageRegistry:</span> <span class="string"><your-registry-url></span>
-  <span class="keyword">imagePullSecrets:</span>
-    - <span class="string">local-registry-secret</span>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">4. 驗證 images 目錄存在且包含所需封存檔</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">ls</span> -lh images/*/
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 執行安裝腳本</h3>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.2rem, 2.5vh, 1.8rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">./install.sh</span> --airgap --registry <span class="string">$LOCAL_REGISTRY</span>
-                </div>
-
-                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(212, 165, 116, 0.1); border-left: 3px solid #d4a574;">
-                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
-                        <strong>提示:</strong> 安裝過程約需 15-30 分鐘
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">5. 使用 airgap 套件中的前置元件安裝 K3s</h3>
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff0000; margin-bottom: clamp(1rem, 2vh, 1.5rem);">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0; color: #ff0000;">
+                        <strong>注意:</strong> 此步驟必須以 root 使用者執行
                     </p>
+                </div>
+                <div class="code-block reveal" style="font-size: clamp(0.7rem, 1.15vw, 0.9rem);">
+<span class="comment"># 以 root 身份在離線 VM 上執行</span><br>
+<span class="keyword">export</span> K3S_RELEASE_VER=v1.33.4+k3s1<br>
+<br>
+<span class="comment"># 建立 K3s images 目錄</span><br>
+<span class="keyword">sudo mkdir</span> -p /var/lib/rancher/k3s/agent/images/<br>
+<br>
+<span class="comment"># 從前置元件複製 K3s airgap images</span><br>
+<span class="keyword">sudo</span> /usr/bin/cp -f ./prerequisites/k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/<br>
+<br>
+<span class="comment"># 複製 K3s binary 到系統路徑</span><br>
+<span class="keyword">sudo</span> /usr/bin/cp -f ./prerequisites/k3s /usr/local/bin/<br>
+<span class="keyword">sudo chmod</span> +x /usr/local/bin/k3s<br>
+<br>
+<span class="comment"># 安裝 K3s (停用 traefik)</span><br>
+INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_VERSION=<span class="string">${K3S_RELEASE_VER}</span> ./prerequisites/install.sh --write-kubeconfig-mode 644 --disable traefik
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Slide 27: Step 6 - 驗證安裝 -->
+    <!-- Slide 27: Step 3 - 在離線 VM 上安裝 (3) -->
     <section class="slide">
         <div class="slide-content">
             <div class="content-wrapper">
                 <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">27</div>
-                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 6: 驗證安裝</h2>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (3)</h2>
                 
-                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">1. 檢查 Pod 狀態</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">8. 解壓縮並安裝 Helm</h3>
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff0000; margin-bottom: clamp(1rem, 2vh, 1.5rem);">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0; color: #ff0000;">
+                        <strong>注意:</strong> 此步驟必須以 root 使用者執行
+                    </p>
+                </div>
+                <div class="code-block reveal" style="font-size: clamp(0.75rem, 1.25vw, 0.95rem);">
+<span class="comment"># 以 root 身份在離線 VM 上執行</span><br>
+<span class="keyword">export</span> HELM_VERSION=v3.20.0<br>
+<br>
+<span class="comment"># 從前置元件解壓縮 Helm tarball</span><br>
+<span class="keyword">tar</span> -zxvf ./prerequisites/helm-<span class="string">${HELM_VERSION}</span>-linux-amd64.tar.gz<br>
+<br>
+<span class="comment"># 複製 Helm binary 到系統路徑</span><br>
+<span class="keyword">sudo cp</span> -f linux-amd64/helm /usr/local/bin/<br>
+<span class="keyword">chmod</span> 755 /usr/local/bin/helm<br>
+<br>
+<span class="comment"># 確保 /usr/local/bin 在 PATH 中</span><br>
+<span class="keyword">export</span> PATH=<span class="string">$PATH</span>:/usr/local/bin<br>
+<br>
+<span class="comment"># 驗證 Helm 安裝</span><br>
+<span class="keyword">helm</span> version
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 28: Step 3 - 在離線 VM 上安裝 (4) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">28</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (4)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">9. 設定安裝參數</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">a. 設定環境所需的變數:</p>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">kubectl</span> get pods -n concert
+<span class="keyword">export</span> DOCKER_EXE=podman<br>
+<span class="keyword">export</span> INSTANCE_ADDRESS=$(<span class="keyword">hostname</span> -f)
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 檢查服務狀態</h3>
-                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">kubectl</span> get svc -n concert
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">將 <code><podman|docker></code> 替換為您的容器執行環境</p>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>注意:</strong> 對於 non-root 安裝,建議使用 Podman 作為容器執行環境
+                    </p>
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 訪問 Concert UI</h3>
-                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.6rem, 1.2vh, 0.9rem);">取得訪問 URL:</p>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">b. 建立 <code>etc/params.ini</code> 檔案 (如果在有網路連線的 VM 上未建立),或編輯現有的 <code>etc/params.ini</code> 檔案來設定您的安裝:</p>
                 <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">echo</span> <span class="string">"https://$(kubectl get svc concert-ui -n concert -o jsonpath='{.status.loadBalancer.ingress[0].ip}'):12443"</span>
+<span class="keyword">vi</span> etc/params.ini
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 29: Step 3 - 在離線 VM 上安裝 (5) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">29</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (5)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">etc/params.ini 範例</h3>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.75rem, 1.25vw, 0.95rem);">
+<span class="comment"># 要安裝的產品必須與在有網路連線的 VM 上下載的產品相符</span><br>
+INSTALL_CONCERT=TRUE<br>
+INSTALL_DATAAPPS=FALSE<br>
+INSTALL_WORKFLOWS=TRUE<br>
+<br>
+<span class="comment"># VM 特定設定</span><br>
+INSTALL_VM=TRUE<br>
+WORKFLOWS_INSTANCE_ADDRESS=<span class="string">${INSTANCE_ADDRESS}</span>
+                </div>
+
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">有關必要和選用參數的完整清單,請參閱 Configuring params.ini file</p>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;">
+                    <p style="font-size: clamp(0.85rem, 1.4vw, 1.05rem); margin: 0; margin-bottom: clamp(0.5rem, 1vh, 0.8rem);">
+                        <strong>重要:</strong>
+                    </p>
+                    <ul style="margin: 0; padding-left: clamp(1.5rem, 3vw, 2rem); font-size: clamp(0.8rem, 1.3vw, 1rem);">
+                        <li>在離線安裝上安裝的產品應與在有網路連線的 VM 上安裝的產品相符</li>
+                        <li><code>IMAGE_REGISTRY_PREFIX</code> 必須以 <code>cp.icr.io/cp</code> 開頭,安裝程式才能將其識別為離線安裝</li>
+                        <li>離線 VM 上不需要 registry 憑證</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 30: Step 3 - 在離線 VM 上安裝 (6) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">30</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 3: 在離線 VM 上安裝 (6)</h2>
+                
+                <h3 class="reveal" style="color: #d4a574; margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">10. 執行安裝設定腳本</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">在離線 VM 上部署 Concert 和 Concert Workflows:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+./bin/setup --license_acceptance=yes --username=<span class="string"><user></span> --password=<span class="string"><password></span>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">11. 驗證已安裝產品的狀態</h3>
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">對於 Podman:</p>
+                <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">podman</span> ps
+                </div>
+
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">對於 K3s (Concert Workflows):</p>
+                <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">kubectl</span> get pods -A
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 31: Step 4 - 存取 Web UI -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">31</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 4: 存取 Web UI</h2>
+                
+                <p class="reveal" style="font-size: clamp(1rem, 1.65vw, 1.25rem); margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    成功安裝後,開啟網頁瀏覽器並存取 Concert 產品。要登入所需的元件,可以使用以下任一方法:
+                </p>
+
+                <ul class="content-list" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem);">
+                    <li class="reveal">可以透過導航到輸出中提供的 URL 詳細資訊來存取統一實例 UI。輸入登入憑證 (在安裝期間於設定腳本中提供的使用者名稱和密碼),然後點擊 <strong>Login</strong>。登入統一 UI 後,您可以存取並導航到每個元件,實現它們之間的輕鬆導航</li>
+                    <li class="reveal">使用以下 URL 存取 Concert 產品:</li>
+                </ul>
+
+                <div class="reveal" style="margin-top: clamp(1.5rem, 3vh, 2rem); padding: clamp(1rem, 2vh, 1.5rem); background: rgba(212, 165, 116, 0.05); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(212, 165, 116, 0.3);">
+                                <th style="padding: clamp(0.5rem, 1vh, 0.8rem); text-align: left; color: #d4a574;">元件</th>
+                                <th style="padding: clamp(0.5rem, 1vh, 0.8rem); text-align: left; color: #d4a574;">URL</th>
+                                <th style="padding: clamp(0.5rem, 1vh, 0.8rem); text-align: left; color: #d4a574;">預設 Port</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid rgba(212, 165, 116, 0.1);">
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">Concert</td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);"><code>https://<VM_FQDN>:12443</code></td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">12443</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(212, 165, 116, 0.1);">
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">Concert Workflows</td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);"><code>https://<VM_FQDN>:443/workflows/</code></td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">443</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">Concert Data Apps</td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);"><code>https://<VM_FQDN>:15443</code></td>
+                                <td style="padding: clamp(0.5rem, 1vh, 0.8rem);">15443</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 32: Step 4 - 存取 Web UI (續) -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="content-wrapper">
+                <div class="chapter-number" style="bottom: calc(clamp(1.5rem, 3vh, 2.5rem) - 6rem);">32</div>
+                <h2 class="reveal" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem);">Step 4: 存取 Web UI (續)</h2>
+                
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-top: clamp(1.5rem, 3vh, 2rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">
+                    將 <code><VM_FQDN></code> 替換為您 VM 的完整網域名稱 (例如 <code>vm.example.com</code>)。對於本地存取,您可以使用 <code>localhost</code> 代替 FQDN
+                </p>
+
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">
+                    使用您的憑證登入。使用在執行安裝設定腳本時指定的 <code>username</code> 和 <code>password</code> 登入 Concert
+                </p>
+
+                <p class="reveal" style="font-size: clamp(0.95rem, 1.55vw, 1.15rem); margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem);">
+                    點擊 <strong>Login</strong> 以存取產品
+                </p>
+
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-top: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.9rem, 1.5vw, 1.1rem); margin: 0;">
+                        <strong>注意:</strong> 您可能會看到有關 SSL 憑證的安全警告。這對於自簽憑證是正常的。繼續前往網站 (確切步驟取決於您的瀏覽器)。要為 Concert 和 Concert Data Apps 帶入您自己的 SSL 憑證,請參閱 Bring your own SSL certificate
+                    </p>
                 </div>
             </div>
         </div>
