@@ -1140,13 +1140,20 @@ INSTALL_WORKFLOWS=TRUE
                     </p>
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 設定預設權限</h3>
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">2. 切換到寬容模式（排查用）</h3>
                 <div class="code-block reveal" style="margin-bottom: clamp(1.5rem, 3vh, 2rem); font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
-<span class="keyword">umask</span> 0022
+<span class="keyword">sudo</span> setenforce 0
                 </div>
 
-                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 解壓縮封存檔</h3>
+                <div class="reveal" style="padding: clamp(0.8rem, 1.5vh, 1rem); background: rgba(91, 143, 216, 0.1); border-left: 3px solid #5b8fd8; margin-bottom: clamp(1.5rem, 3vh, 2rem);">
+                    <p style="font-size: clamp(0.85rem, 1.4vw, 1.05rem); margin: 0;">
+                        <strong>注意:</strong> 此指令會將 SELinux 模式切換為 Permissive（寬容模式），用於排查問題。在生產環境中應謹慎使用
+                    </p>
+                </div>
+
+                <h3 class="reveal" style="color: #d4a574; margin-bottom: clamp(0.8rem, 1.5vh, 1.2rem); font-size: clamp(1.1rem, 1.8vw, 1.4rem);">3. 設定預設權限並解壓縮封存檔</h3>
                 <div class="code-block reveal" style="font-size: clamp(0.85rem, 1.4vw, 1.05rem);">
+<span class="keyword">umask</span> 0022<br>
 <span class="keyword">tar</span> -xzf ibm-concert-x86-airgap.tar.gz<br>
 <span class="keyword">cd</span> ibm-concert
                 </div>
